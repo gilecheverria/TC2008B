@@ -1,0 +1,20 @@
+services:
+  backend:
+    build:
+      context: ./Backend
+      dockerfile: Dockerfile
+    ports:
+      - "8585:8585"
+    environment:
+      FLASK_HOST: "0.0.0.0"
+      FLASK_PORT: "8585"
+      FLASK_DEBUG: "false"
+
+  frontend:
+    build:
+      context: ./Frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend

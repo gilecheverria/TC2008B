@@ -1,0 +1,76 @@
+/*
+ * CSS styles to create a centered canvas with a header
+ *
+ * Diego Córdova Rodríguez, A01781166
+ * 2025-11-14
+ */
+
+*{
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+body {
+    background: linear-gradient(0deg, #262626 0%, #3b3b3b 100%);
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+    margin: 0;
+    overflow: hidden;
+    display:grid;
+    grid-template-rows: 10vh 1fr;
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "header"
+      "main";
+    justify-content: center;
+    align-items: center;
+    justify-items: center;
+}
+
+#headerContainer{
+  grid-area: header;
+  background-color: rgb(40, 40, 40);
+  color: whitesmoke;
+  border-bottom: 2px solid #525252;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+#headerContainer p{
+  margin: 0px;
+  font-size: 0.8em;
+}
+
+h1{
+  margin: 0px;
+  font-size: 1.5em;
+}
+
+canvas {
+    width: 75vw;
+    height: 75vh;
+    border: 1px solid black;
+    box-shadow: 0 20px 50px rgb(0, 0, 0);
+    /* width: 600px; */
+    /* height: 600px; */
+}
+
+#canvas {
+  background-color: White;
+  border: 4px solid #4b4b4b;
+  border-radius: 15px;
+  grid-area: main;
+}
+
+.lil-gui.autoPlace{
+  top: 15vh;
+  right: 5vw;
+}
+
+#backButton {
+    margin: 10px;
+}

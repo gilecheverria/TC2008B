@@ -6,7 +6,7 @@ By the end of this course, you will create a traffic simulation where each car
 is an individual agent traversing a city alongside other autonomous agents.
 
 
-![Sample Project](./Images/Sample_Demo.png)
+![Sample Project](./Images/Project_Sample.png)
 Sample simulation created by
 - Aquiba Yudah Benarroch Bittan
 - Diego Córdova Rodríguez

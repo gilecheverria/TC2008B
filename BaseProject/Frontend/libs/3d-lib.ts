@@ -25,67 +25,61 @@ export class V3 {
         return v;
     }
 
+    // TODO: Complete the following methods
+
     static length(v: Vec3): number {
-        return Math.sqrt(v[X] * v[X] + v[Y] * v[Y] + v[Z] * v[Z]);
+        return 0;
     }
 
     static normalize(v: Vec3, dest?: Vec3): Vec3 {
         dest = dest || new Float32Array(3);
-        const size = V3.length(v);
-        if (size > 0) {
-            dest[X] = v[X] / size;
-            dest[Y] = v[Y] / size;
-            dest[Z] = v[Z] / size;
-        } else {
-            dest[X] = 0;
-            dest[Y] = 0;
-            dest[Z] = 0;
-        }
+
         return dest;
     }
 
     static dot(u: Vec3, v: Vec3): number {
-        return u[X] * v[X] + u[Y] * v[Y] + u[Z] * v[Z];
+        return 0;
     }
 
     static cross(u: Vec3, v: Vec3, dest?: Vec3): Vec3 {
         dest = dest || new Float32Array(3);
-        dest[X] = u[Y] * v[Z] - u[Z] * v[Y];
-        dest[Y] = u[Z] * v[X] - u[X] * v[Z];
-        dest[Z] = u[X] * v[Y] - u[Y] * v[X];
+
         return dest;
     }
 
     // Add two vectors
     static add(u: Vec3, v: Vec3, dest?: Vec3): Vec3 {
         dest = dest || new Float32Array(3);
-        dest[X] = u[X] + v[X];
-        dest[Y] = u[Y] + v[Y];
-        dest[Z] = u[Z] + v[Z];
+
         return dest;
     }
 
     // Subtract two vectors
     static subtract(u: Vec3, v: Vec3, dest?: Vec3): Vec3 {
         dest = dest || new Float32Array(3);
-        dest[X] = u[X] - v[X];
-        dest[Y] = u[Y] - v[Y];
-        dest[Z] = u[Z] - v[Z];
+
         return dest;
     }
 
     // Multiply a vector by a scalar value
     static scale(u: Vec3, s: number, dest?: Vec3): Vec3 {
         dest = dest || new Float32Array(3);
-        dest[X] = u[X] * s;
-        dest[Y] = u[Y] * s;
-        dest[Z] = u[Z] * s;
+
         return dest;
     }
 }
 
 // 4x4 matrices used for 3D transformations
 export class M4 {
+    static identity(): Mat4 {
+        return new Float32Array([
+            1, 0, 0, 0,
+            0, 1, 0, 0,
+            0, 0, 1, 0,
+            0, 0, 0, 1
+        ]);
+    }
+
     /*
     // Matrix guide:
     // Consider the rows and columns are transposed
@@ -133,87 +127,54 @@ export class M4 {
         // The matrices are oriented transposed,
         // so the multiplication must be adjusted accordingly
         return new Float32Array([
-            a00 * b00 + a10 * b01 + a20 * b02 + a30 * b03,
-            a01 * b00 + a11 * b01 + a21 * b02 + a31 * b03,
-            a02 * b00 + a12 * b01 + a22 * b02 + a32 * b03,
-            a03 * b00 + a13 * b01 + a23 * b02 + a33 * b03,
-            a00 * b10 + a10 * b11 + a20 * b12 + a30 * b13,
-            a01 * b10 + a11 * b11 + a21 * b12 + a31 * b13,
-            a02 * b10 + a12 * b11 + a22 * b12 + a32 * b13,
-            a03 * b10 + a13 * b11 + a23 * b12 + a33 * b13,
-            a00 * b20 + a10 * b21 + a20 * b22 + a30 * b23,
-            a01 * b20 + a11 * b21 + a21 * b22 + a31 * b23,
-            a02 * b20 + a12 * b21 + a22 * b22 + a32 * b23,
-            a03 * b20 + a13 * b21 + a23 * b22 + a33 * b23,
-            a00 * b30 + a10 * b31 + a20 * b32 + a30 * b33,
-            a01 * b30 + a11 * b31 + a21 * b32 + a31 * b33,
-            a02 * b30 + a12 * b31 + a22 * b32 + a32 * b33,
-            a03 * b30 + a13 * b31 + a23 * b32 + a33 * b33,
-        ]);
-    }
-
-    static identity(): Mat4 {
-        return new Float32Array([
-            1, 0, 0, 0,
-            0, 1, 0, 0,
-            0, 0, 1, 0,
-            0, 0, 0, 1
+            1,  0,  0,  0,
+            0,  1,  0,  0,
+            0,  0,  1,  0,
+            0,  0,  0,  1
         ]);
     }
 
     static translation(v: Vec3): Mat4 {
-        const tx = v[X];
-        const ty = v[Y];
-        const tz = v[Z];
         return new Float32Array([
              1,  0,  0,  0,
              0,  1,  0,  0,
              0,  0,  1,  0,
-            tx, ty, tz,  1
+             0,  0,  0,  1
         ]);
     }
 
     static rotationX(angleRadians: number): Mat4 {
-        const c = Math.cos(angleRadians);
-        const s = Math.sin(angleRadians);
         return new Float32Array([
              1,  0,  0,  0,
-             0,  c,  s,  0,
-             0, -s,  c,  0,
+             0,  1,  0,  0,
+             0,  0,  1,  0,
              0,  0,  0,  1
         ]);
     }
 
     static rotationY(angleRadians: number): Mat4 {
-        const c = Math.cos(angleRadians);
-        const s = Math.sin(angleRadians);
         return new Float32Array([
-            c,  0, -s,  0,
+             1,  0,  0,  0,
              0,  1,  0,  0,
-             s,  0,  c,  0,
+             0,  0,  1,  0,
              0,  0,  0,  1
         ]);
     }
 
     static rotationZ(angleRadians: number): Mat4 {
-        const c = Math.cos(angleRadians);
-        const s = Math.sin(angleRadians);
         return new Float32Array([
-             c,  s,  0,  0,
-            -s,  c,  0,  0,
+             1,  0,  0,  0,
+             0,  1,  0,  0,
              0,  0,  1,  0,
              0,  0,  0,  1
         ]);
     }
 
     static scale(v: Vec3): Mat4 {
-        const sx = v[X];
-        const sy = v[Y];
-        const sz = v[Z];
         return new Float32Array([
-            sx,  0,  0,  0,
-             0, sy,  0,  0,
-             0,  0, sz,  0,
+             1,  0,  0,  0,
+             0,  1,  0,  0,
+             0,  0,  1,  0,
              0,  0,  0,  1
         ]);
     }

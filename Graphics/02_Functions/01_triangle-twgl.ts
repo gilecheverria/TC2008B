@@ -10,9 +10,11 @@ import * as twgl from 'twgl-base.js';
 
 // Vertex Shader as a string
 const vsGLSL = `#version 300 es
+// Attributes
 in vec4 a_position;
 in vec4 a_color;
 
+// Varying
 out vec4 v_color;
 
 void main() {
@@ -25,13 +27,15 @@ void main() {
 const fsGLSL = `#version 300 es
 precision highp float;
 
+// Varying
 in vec4 v_color;
 
+// Output
 out vec4 outColor;
 
 void main() {
     outColor = v_color;
-    //outColor = vec4(1, 0, 1, 1);
+    //outColor = vec4(0, 1, 0, 1);
 }
 `;
 

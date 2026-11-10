@@ -57,20 +57,16 @@ class RotationScene extends Scene<'model' | 'pivot'> {
                                                    pivot.transforms.t.y);
 
         // Transform matrices for the model
-        const scaleMatrix: Mat3 = M3.scale(v2_scale);
-        const pivotToCenter: Mat3 = M3.translation(v2_pivot_to_center);
-        const centerToPivot: Mat3 = M3.translation(v2_center_to_pivot);
-        const rotateMatrix: Mat3 = M3.rotation(model.transforms.rr.z);
-        const translateMatrix: Mat3 = M3.translation(v2_trans);
+        // TODO: Create the matrices necessary
+
+
 
         // Create a composite transform matrix
         let modelTransforms: Mat3 = M3.identity();
-        modelTransforms = M3.multiply(scaleMatrix, modelTransforms);
-        modelTransforms = M3.multiply(translateMatrix, modelTransforms);
-        // Rotation around an arbitrary point
-        modelTransforms = M3.multiply(pivotToCenter, modelTransforms);
-        modelTransforms = M3.multiply(rotateMatrix, modelTransforms);
-        modelTransforms = M3.multiply(centerToPivot, modelTransforms);
+        // TODO: Multiply the matrices in the correct order to obtain the required results
+
+
+
 
         gl.useProgram(programInfo.program);
 

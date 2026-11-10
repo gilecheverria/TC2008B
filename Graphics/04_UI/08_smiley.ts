@@ -23,7 +23,7 @@ import fsGLSL from './fs_vertex_color.glsl?raw';
  * Subclass of Scene with the particular objects and settings for this example.
  * Specifies the objects that will be used, and the UI operations available.
  */
-class RotationScene extends Scene<'model' | 'pivot'> {
+class RotationScene extends Scene {
     constructor(gl: WebGL2RenderingContext) {
         super(gl, vsGLSL, fsGLSL);
 
@@ -166,7 +166,7 @@ function main(): void {
 
     const scene = new RotationScene(gl);
     scene.setupUI();
-    scene.draw();
+    scene.draw(0);
 }
 
 main()

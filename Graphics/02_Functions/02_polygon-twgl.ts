@@ -50,7 +50,7 @@ function main(): void {
 
     const programInfo = twgl.createProgramInfo(gl, [vsGLSL, fsGLSL]);
 
-    const sides = 6;
+    const sides = 8;
     const arrays = generateData(sides);
     const bufferInfo = twgl.createBufferInfoFromArrays(gl, arrays);
     const vao = twgl.createVAOFromBufferInfo(gl, programInfo, bufferInfo);

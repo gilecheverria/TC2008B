@@ -83,40 +83,60 @@ function shapeF_centered() : twgl.Arrays {
 }
 
 function smiley(radius: number) : twgl.Arrays {
-    // The arrays are initially empty
     const positionData: number[] = [];
     const colorData: number[] = [];
     const indexData: number[] = [];
+    const generateCircle = (sides: number, centerX: number, centerY: number, circleRadius: number,
+        color: [number, number, number, number], startAngle = 0, endAngle = 2 * Math.PI) => {
+        const center = positionData.length / 2;
+        positionData.push(centerX, centerY);
+        colorData.push(...color);
+        const angleStep = (endAngle - startAngle) / sides;
 
-    // TODO: Create you own shape for a smiley face
-    //  - Add coordinates as pairs of elements into the positionData array
-    //  - Add color values as 3 values (RBG) into the colorData array
-    //  - Add index for the order in which vertices are connected, 3 values for each triangle
-    // HINT: You can use polar coordinates to define the positions of vertices,
-    // using the radius and an angle. Then convert them to polar coordinates.
+        for (let s = 0; s <= sides; s++) {
+            const angle = startAngle + angleStep * s;
+            positionData.push(centerX + circleRadius * Math.cos(angle),
+                centerY + circleRadius * Math.sin(angle));
+            colorData.push(...color);
+        }
+        for (let s = 0; s < sides; s++) {
+            indexData.push(center, center + s + 1, center + s + 2);
+        }
+    };
 
-    // Sample data for a single yellow triangle. Replace with your values.
-    positionData.push(0, 100);
-    positionData.push(-120, -100);
-    positionData.push(120, -100);
-    colorData.push(0.9, 0.8, 0, 1);
-    colorData.push(0.9, 0.8, 0, 1);
-    colorData.push(0.9, 0.8, 0, 1);
+    generateCircle(40, 0, 0, radius, [1, 0.78, 0.05, 1]);
+    const black: [number, number, number, number] = [0, 0, 0, 1];
+    generateCircle(28, -radius * 0.43, radius * 0.28, radius * 0.18, black);
 
-    indexData.push(0, 2, 1);
+    //Wink
+    const addRectangle = (x1: number, y1: number, x2: number, y2: number, width: number) => {
+        const dx = x2 - x1;
+        const dy = y2 - y1;
+        const length = Math.hypot(dx, dy);
+        const ox = -dy / length * width / 2;
+        const oy = dx / length * width / 2;
+        const first = positionData.length / 2;
 
+        positionData.push(
+            x1 + ox, y1 + oy,
+            x1 - ox, y1 - oy,
+            x2 - ox, y2 - oy,
+            x2 + ox, y2 + oy,
+        );
+        for (let i = 0; i < 4; i++) colorData.push(...black);
+        indexData.push(first, first + 1, first + 2, first, first + 2, first + 3);
+    };
+    addRectangle(radius * 0.22, radius * 0.28, radius * 0.55, radius * 0.40, radius * 0.04);
+    addRectangle(radius * 0.22, radius * 0.28, radius * 0.55, radius * 0.16, radius * 0.04);
+    generateCircle(12, radius * 0.22, radius * 0.28, radius * 0.02, black);
 
+    generateCircle(40, 0, -radius * 0.15, radius * 0.48, black, Math.PI, 2 * Math.PI);
 
-
-
-    // Build the final object with the arrays for positions, colors, and indices
     const arrays: twgl.Arrays = {
         a_position: { numComponents: 2, data: positionData },
         a_color:    { numComponents: 4, data: colorData },
         indices:    { numComponents: 3, data: indexData },
     };
-
-    console.log(arrays);
 
     return arrays;
 }

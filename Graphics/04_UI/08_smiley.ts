@@ -1,8 +1,9 @@
 /*
  * Script to draw a 2D smiley face, and apply trasnformations to it
  *
- * Gilberto Echeverria
- * 2026-07-16
+ * Ilan Hanenberg Wasserman
+ * A01787440
+ * 2026-11-16
  */
 
 'use strict';
@@ -18,12 +19,33 @@ import { type Color } from '../libs/color.js';
 import vsGLSL from './vs_matrices_vcolor.glsl?raw';
 import fsGLSL from './fs_vertex_color.glsl?raw';
 
+const transformOrders = [
+    'scale -> rotation -> translation',
+    'scale -> translation -> rotation',
+    'translation -> scale -> rotation',
+    'rotation -> translation -> scale',
+    'rotation -> scale -> translation',
+] as const;
+
+type TransformOrder = typeof transformOrders[number];
+type TransformName = 'scale' | 'rotation' | 'translation';
+
+const transformSequences: Record<TransformOrder, TransformName[]> = {
+    'scale -> rotation -> translation': ['scale', 'rotation', 'translation'],
+    'scale -> translation -> rotation': ['scale', 'translation', 'rotation'],
+    'translation -> scale -> rotation': ['translation', 'scale', 'rotation'],
+    'rotation -> translation -> scale': ['rotation', 'translation', 'scale'],
+    'rotation -> scale -> translation': ['rotation', 'scale', 'translation'],
+};
+
 
 /*
  * Subclass of Scene with the particular objects and settings for this example.
  * Specifies the objects that will be used, and the UI operations available.
  */
 class RotationScene extends Scene {
+    private selectedOrder: TransformOrder = transformOrders[0];
+
     constructor(gl: WebGL2RenderingContext) {
         super(gl, vsGLSL, fsGLSL);
 
@@ -33,7 +55,7 @@ class RotationScene extends Scene {
         model.transforms.t.x = gl.canvas.width / 2;
         model.transforms.t.y = gl.canvas.height / 2;
 
-        const pivot = this.addObject('pivot', diamond(30),
+        const pivot = this.addObject('pivot', diamond(12),
             [ 0.6, 0.6, 0.6, 1]);
         pivot.transforms.t.x = gl.canvas.width / 2;
         pivot.transforms.t.y = gl.canvas.height / 2;
@@ -45,29 +67,30 @@ class RotationScene extends Scene {
         const model = this.getObject('model');
         const pivot = this.getObject('pivot');
 
-        // Vector to the position of the model
         const v2_trans: Vec2 = V2.create(model.transforms.t.x, model.transforms.t.y);
         const v2_scale: Vec2 = V2.create(model.transforms.s.x, model.transforms.s.y);
 
-        // Vector to translate the pivot to the center of the world
-        const v2_pivot_to_center: Vec2 = V2.create(-pivot.transforms.t.x,
-                                                   -pivot.transforms.t.y);
-        // Vector to translate the pivot back to its original position
-        const v2_center_to_pivot: Vec2 = V2.create(pivot.transforms.t.x,
-                                                   pivot.transforms.t.y);
+        const v2_pivot_to_center: Vec2 = V2.create(-pivot.transforms.t.x, -pivot.transforms.t.y);
+        const v2_center_to_pivot: Vec2 = V2.create(pivot.transforms.t.x, pivot.transforms.t.y);
 
-        // Transform matrices for the model
-        // TODO: Create the matrices necessary
+        const translateMatrixModel: Mat3 = M3.translation(v2_trans);
+        const scaleMatrixModel: Mat3 = M3.scale(v2_scale);
+        const pivotToOrigin: Mat3 = M3.translation(v2_pivot_to_center);
+        const rotateMatrixModel: Mat3 = M3.rotation(model.transforms.rr.z);
+        const originToPivot: Mat3 = M3.translation(v2_center_to_pivot);
 
+        let modelRotation: Mat3 = M3.multiply(rotateMatrixModel, pivotToOrigin);
+        modelRotation = M3.multiply(originToPivot, modelRotation);
 
-
-        // Create a composite transform matrix
+        const matrices: Record<TransformName, Mat3> = {
+            scale: scaleMatrixModel,
+            rotation: modelRotation,
+            translation: translateMatrixModel,
+        };
         let modelTransforms: Mat3 = M3.identity();
-        // TODO: Multiply the matrices in the correct order to obtain the required results
-
-
-
-
+        for (const transformation of transformSequences[this.selectedOrder]) {
+            modelTransforms = M3.multiply(matrices[transformation], modelTransforms);
+        }
         gl.useProgram(programInfo.program);
 
         let uniforms = {
@@ -75,14 +98,13 @@ class RotationScene extends Scene {
             u_transforms: modelTransforms,
             u_color: model.color,
         };
+
         twgl.setUniforms(programInfo, uniforms);
         gl.bindVertexArray(model.vao);
         twgl.drawBufferInfo(gl, model.bufferInfo);
 
-        // Transform matrices for the pivot
         const translateMatrixPivot: Mat3 = M3.translation(v2_center_to_pivot);
 
-        // Composite transform matrix for the pivot (only translation)
         let pivotTransforms: Mat3 = M3.identity();
         pivotTransforms = M3.multiply(translateMatrixPivot, pivotTransforms);
 
@@ -102,6 +124,7 @@ class RotationScene extends Scene {
         const pivot = this.getObject('pivot');
 
         const gui = new GUI();
+        gui.add(this, 'selectedOrder', transformOrders) .name('Transformation order');
 
         const modelFolder = gui.addFolder('Model');
 
@@ -129,12 +152,6 @@ class RotationScene extends Scene {
         scaFolder.add(model.transforms.s, 'y', -5, 5)
             .onChange((value: number) => {
                 model.transforms.s.y = value;
-            });
-
-        const colorFolder = modelFolder.addFolder('Color');
-        colorFolder.addColor(model, 'color')
-            .onChange((value: Color) => {
-                model.color = value;
             });
 
         const pivotFolder = gui.addFolder('Pivot');

@@ -32,7 +32,7 @@ out vec4 outColor;
 
 void main() {
     outColor = v_color;
-    //outColor = vec4(1, 0, 1, 1);
+    //outColor = vec4(0, 1, 0, 1);
 }
 `;
 

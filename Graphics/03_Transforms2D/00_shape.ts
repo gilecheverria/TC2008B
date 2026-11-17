@@ -12,8 +12,8 @@ import * as twgl from 'twgl-base.js'
 import { shapeF } from '../libs/shapes.js'
 
 // Import the shaders from external files
-import vsGLSL from './vs_00_no_transform.glsl?raw';
-import fsGLSL from './fs_flat_color.glsl?raw';
+import vsGLSL from './vs_00_no_transform.glsl?raw'; // importa el archivo como string, los shaders se compilan en tiempo de ejecución
+import fsGLSL from './fs_flat_color.glsl?raw'; // importa el archivo como string, los shaders se compilan en tiempo de ejecución
 
 function main() : void {
     const canvas = document.querySelector('canvas');

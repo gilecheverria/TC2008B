@@ -61,8 +61,8 @@ function drawScene(
     {
         u_resolution: [gl.canvas.width, gl.canvas.height],
         u_color: [Math.random(), Math.random(), Math.random(), 1],
-        u_translation: translation,
         u_rotation: rotation,
+        u_translation: translation,
     }
     console.log(uniforms);
 

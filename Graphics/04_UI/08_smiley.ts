@@ -1,5 +1,8 @@
-/*
- * Script to draw a 2D smiley face, and apply trasnformations to it
+/**
+ * Script to draw a 2D smiley face, and apply transformations to it.
+ *
+ * Using matrices to apply translation, rotation and scale.
+ * The rotation is performed relative to a movable pivot.
  *
  * Gilberto Echeverria
  * 2026-07-16
@@ -9,7 +12,7 @@
 
 import * as twgl from 'twgl-base.js';
 import GUI from 'lil-gui';
-import { diamond, shapeF_centered, smiley } from '../libs/shapes.js';
+import { diamond, smiley } from '../libs/shapes.js';
 import { V2, M3, type Vec2, type Mat3 } from '../libs/2d-lib.js';
 import { Scene } from '../libs/scene.js';
 import { type Color } from '../libs/color.js';
@@ -18,60 +21,127 @@ import { type Color } from '../libs/color.js';
 import vsGLSL from './vs_matrices_vcolor.glsl?raw';
 import fsGLSL from './fs_vertex_color.glsl?raw';
 
+// Available transformation orders
+const transformOrders = [
+    'scale -> rotation -> translation',
+    'scale -> translation -> rotation',
+    'translation -> scale -> rotation',
+    'rotation -> translation -> scale',
+    'rotation -> scale -> translation'
+];
 
-/*
- * Subclass of Scene with the particular objects and settings for this example.
- * Specifies the objects that will be used, and the UI operations available.
- */
-class RotationScene extends Scene<'model' | 'pivot'> {
+// Subclass of Scene with the particular objects and settings
+class RotationScene extends Scene {
+
+    // Variable for the scene settings
+    settings = {
+        transformOrder: 'scale -> rotation -> translation'
+    };
+
     constructor(gl: WebGL2RenderingContext) {
         super(gl, vsGLSL, fsGLSL);
 
         // Create the objects for this scene
         const model = this.addObject('model', smiley(150),
-            [ Math.random(), Math.random(), Math.random(), 1 ]);
+            [Math.random(), Math.random(), Math.random(), 1]);
+
         model.transforms.t.x = gl.canvas.width / 2;
         model.transforms.t.y = gl.canvas.height / 2;
 
+        // Create the pivot object
         const pivot = this.addObject('pivot', diamond(30),
-            [ 0.6, 0.6, 0.6, 1]);
+            [0.6, 0.6, 0.6, 1]);
+
         pivot.transforms.t.x = gl.canvas.width / 2;
         pivot.transforms.t.y = gl.canvas.height / 2;
     }
 
-    // Method to draw the scene.
+    // Method to draw the scene
     protected render(): void {
         const { gl, programInfo } = this;
+
         const model = this.getObject('model');
         const pivot = this.getObject('pivot');
 
-        // Vector to the position of the model
-        const v2_trans: Vec2 = V2.create(model.transforms.t.x, model.transforms.t.y);
-        const v2_scale: Vec2 = V2.create(model.transforms.s.x, model.transforms.s.y);
+        // Vectors for translation and scale
+        const v2_trans: Vec2 = V2.create(
+            model.transforms.t.x,
+            model.transforms.t.y
+        );
 
-        // Vector to translate the pivot to the center of the world
-        const v2_pivot_to_center: Vec2 = V2.create(-pivot.transforms.t.x,
-                                                   -pivot.transforms.t.y);
-        // Vector to translate the pivot back to its original position
-        const v2_center_to_pivot: Vec2 = V2.create(pivot.transforms.t.x,
-                                                   pivot.transforms.t.y);
+        const v2_scale: Vec2 = V2.create(
+            model.transforms.s.x,
+            model.transforms.s.y
+        );
 
-        // Transform matrices for the model
-        const scaleMatrix: Mat3 = M3.scale(v2_scale);
-        const pivotToCenter: Mat3 = M3.translation(v2_pivot_to_center);
-        const centerToPivot: Mat3 = M3.translation(v2_center_to_pivot);
-        const rotateMatrix: Mat3 = M3.rotation(model.transforms.rr.z);
-        const translateMatrix: Mat3 = M3.translation(v2_trans);
+        // Vector to translate the pivot to the origin
+        const v2_pivot_to_origin: Vec2 = V2.create(
+            -pivot.transforms.t.x,
+            -pivot.transforms.t.y
+        );
 
-        // Create a composite transform matrix
+        // Vector to translate the origin back to the pivot
+        const v2_origin_to_pivot: Vec2 = V2.create(
+            pivot.transforms.t.x,
+            pivot.transforms.t.y
+        );
+
+        // Transformation matrices for the model
+        const translateMatrixModel: Mat3 =
+            M3.translation(v2_trans);
+
+        const rotateMatrixModel: Mat3 =
+            M3.rotation(model.transforms.rr.z);
+
+        const scaleMatrixModel: Mat3 =
+            M3.scale(v2_scale);
+
+        // Matrices to perform rotation around the pivot
+        const translatePivotToOrigin: Mat3 =
+            M3.translation(v2_pivot_to_origin);
+
+        const translateOriginToPivot: Mat3 =
+            M3.translation(v2_origin_to_pivot);
+
+        // Composite rotation matrix around the pivot
+        let rotationAroundPivot: Mat3 = M3.identity();
+
+        rotationAroundPivot = M3.multiply(
+            translatePivotToOrigin,
+            rotationAroundPivot
+        );
+
+        rotationAroundPivot = M3.multiply(
+            rotateMatrixModel,
+            rotationAroundPivot
+        );
+
+        rotationAroundPivot = M3.multiply(
+            translateOriginToPivot,
+            rotationAroundPivot
+        );
+
+        // Store the transformation matrices
+        const transformations: Record<string, Mat3> = {
+            'scale': scaleMatrixModel,
+            'rotation': rotationAroundPivot,
+            'translation': translateMatrixModel
+        };
+
+        // Create the composite transformation matrix
         let modelTransforms: Mat3 = M3.identity();
-        modelTransforms = M3.multiply(scaleMatrix, modelTransforms);
-        modelTransforms = M3.multiply(translateMatrix, modelTransforms);
-        // Rotation around an arbitrary point
-        modelTransforms = M3.multiply(pivotToCenter, modelTransforms);
-        modelTransforms = M3.multiply(rotateMatrix, modelTransforms);
-        modelTransforms = M3.multiply(centerToPivot, modelTransforms);
 
+        // Apply transformations in the selected order
+        const selectedOrder = this.settings.transformOrder.split(' -> ');
+
+        for (const transform of selectedOrder) {
+            modelTransforms = M3.multiply(
+                transformations[transform],
+                modelTransforms
+            );
+        }
+
+        // Draw the model
         gl.useProgram(programInfo.program);
 
         let uniforms = {
@@ -83,13 +153,19 @@ class RotationScene extends Scene<'model' | 'pivot'> {
         gl.bindVertexArray(model.vao);
         twgl.drawBufferInfo(gl, model.bufferInfo);
 
-        // Transform matrices for the pivot
-        const translateMatrixPivot: Mat3 = M3.translation(v2_center_to_pivot);
+        // Transformation matrix for the pivot
+        const translateMatrixPivot: Mat3 =
+            M3.translation(v2_origin_to_pivot);
 
-        // Composite transform matrix for the pivot (only translation)
+        // Composite transformation matrix for the pivot
         let pivotTransforms: Mat3 = M3.identity();
-        pivotTransforms = M3.multiply(translateMatrixPivot, pivotTransforms);
 
+        pivotTransforms = M3.multiply(
+            translateMatrixPivot,
+            pivotTransforms
+        );
+
+        // Draw the pivot
         uniforms = {
             u_resolution: [gl.canvas.width, gl.canvas.height],
             u_transforms: pivotTransforms,
@@ -100,6 +176,7 @@ class RotationScene extends Scene<'model' | 'pivot'> {
         twgl.drawBufferInfo(gl, pivot.bufferInfo);
     }
 
+    // Setup UI controls
     setupUI(): void {
         const { gl } = this;
         const model = this.getObject('model');
@@ -107,8 +184,10 @@ class RotationScene extends Scene<'model' | 'pivot'> {
 
         const gui = new GUI();
 
+        // Model controls
         const modelFolder = gui.addFolder('Model');
 
+        // Translation controls
         const traFolder = modelFolder.addFolder('Translation');
         traFolder.add(model.transforms.t, 'x', 0, gl.canvas.width)
             .onChange((value: number) => {
@@ -119,12 +198,14 @@ class RotationScene extends Scene<'model' | 'pivot'> {
                 model.transforms.t.y = value;
             });
 
+        // Rotation controls
         const rotFolder = modelFolder.addFolder('Rotation');
         rotFolder.add(model.transforms.rr, 'z', 0, Math.PI * 2)
             .onChange((value: number) => {
                 model.transforms.rr.z = value;
             });
 
+        // Scale controls
         const scaFolder = modelFolder.addFolder('Scale');
         scaFolder.add(model.transforms.s, 'x', -5, 5)
             .onChange((value: number) => {
@@ -135,12 +216,23 @@ class RotationScene extends Scene<'model' | 'pivot'> {
                 model.transforms.s.y = value;
             });
 
+        // Color controls
         const colorFolder = modelFolder.addFolder('Color');
         colorFolder.addColor(model, 'color')
             .onChange((value: Color) => {
                 model.color = value;
             });
 
+        // Transformation order selector
+        const orderFolder = modelFolder.addFolder('Transformation Order');
+
+        orderFolder.add(
+            this.settings,
+            'transformOrder',
+            transformOrders
+        ).name('Order');
+
+        // Pivot controls
         const pivotFolder = gui.addFolder('Pivot');
         const pivotTraFolder = pivotFolder.addFolder('Translation');
         pivotTraFolder.add(pivot.transforms.t, 'x', 0, gl.canvas.width)
@@ -154,9 +246,7 @@ class RotationScene extends Scene<'model' | 'pivot'> {
     }
 }
 
-/*
- * Main function to initialize the WebGL context, create the scene, and set up the UI.
- */
+// Main function to initialize WebGL and the scene
 function main(): void {
     const canvas = document.querySelector('canvas');
     if (!canvas) {
@@ -170,7 +260,7 @@ function main(): void {
 
     const scene = new RotationScene(gl);
     scene.setupUI();
-    scene.draw();
+    scene.draw(0);
 }
 
-main()
+main();

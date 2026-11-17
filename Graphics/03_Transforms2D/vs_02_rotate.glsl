@@ -24,10 +24,7 @@ vec4 projection2D(vec2 position, vec2 resolution) {
 void main() {
     // Create a new vec2 with the results of the rotation operation
     // TODO:
-    vec2 rotatedPosition = vec2(
-        a_position.x * u_rotation.x - a_position.y * u_rotation.y,
-        a_position.y * u_rotation.x + a_position.x * u_rotation.y
-    );
+    vec2 rotatedPosition = vec2(a_position.x * u_rotation.x - a_position.y * u_rotation.y, a_position.x * u_rotation.y + a_position.y * u_rotation.x);
 
     vec2 position = rotatedPosition + u_translation;
 

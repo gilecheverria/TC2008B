@@ -94,16 +94,65 @@ function smiley(radius: number) : twgl.Arrays {
     //  - Add index for the order in which vertices are connected, 3 values for each triangle
     // HINT: You can use polar coordinates to define the positions of vertices,
     // using the radius and an angle. Then convert them to polar coordinates.
+    positionData.push(0, 0); // Center of the smiley face
+    for (let i = 0; i <= 360; i += 10) {
+        const angle = i * Math.PI / 180; // Convert degrees to radians
+        const x = radius * Math.cos(angle);
+        const y = radius * Math.sin(angle);
+        positionData.push(x, y);
+        colorData.push(1, 1, 0, 1); // Yellow color for the face
+    }
+
+    // Create indices for the triangles forming the smiley face
+    for (let i = 1; i <= 36; i++) {
+        indexData.push(0, i, i + 1);
+    }
+    indexData.push(0, 36, 1); // Close the circle
+    let eyeY = radius * 0.35; // Altura de los ojos (hacia arriba)
+    let eyeOffset = radius * 0.35; // Separación desde el centro hacia los lados
+    let eyeSize = radius * 0.16; // Tamaño del ojo
+
+    // Índice base actual donde empiezan los vértices de los ojos
+    let eyeStartIndex = positionData.length / 2;
+
+    // Ojo Izquierdo (3 vértices que forman un pequeño triángulo o "punto")
+    positionData.push(-eyeOffset, eyeY); // Centro del ojo izq
+    positionData.push(-eyeOffset - eyeSize, eyeY + eyeSize); // Esquina superior izq
+    positionData.push(-eyeOffset + eyeSize, eyeY + eyeSize); // Esquina superior der
+
+    // Ojo Derecho
+    positionData.push(eyeOffset, eyeY); // Centro del ojo der
+    positionData.push(eyeOffset - eyeSize, eyeY + eyeSize); // Esquina superior izq
+    positionData.push(eyeOffset + eyeSize, eyeY + eyeSize); // Esquina superior der
+
+    for (let i = 0; i < 6; i++) {
+        colorData.push(0, 0, 0, 1);
+    }
+
+    // Conectar los vértices de los ojos en triángulos (índices)
+    indexData.push(eyeStartIndex, eyeStartIndex + 1, eyeStartIndex + 2);
+    indexData.push(eyeStartIndex + 3, eyeStartIndex + 4, eyeStartIndex + 5);
+
+    // Mouth
+    positionData.push(-eyeOffset, -eyeY); // Left corner of mouth
+    positionData.push(eyeOffset, -eyeY); // Right corner of mouth
+    positionData.push(0, -eyeY - eyeSize); // Bottom of mouth
+
+    for (let i = 0; i < 3; i++) {
+        colorData.push(1, 0, 0, 1);
+    }
+
+    indexData.push(positionData.length / 2 - 3, positionData.length / 2 - 2, positionData.length / 2 - 1);
 
     // Sample data for a single yellow triangle. Replace with your values.
-    positionData.push(0, 100);
+    /*positionData.push(0, 100);
     positionData.push(-120, -100);
     positionData.push(120, -100);
     colorData.push(0.9, 0.8, 0, 1);
     colorData.push(0.9, 0.8, 0, 1);
     colorData.push(0.9, 0.8, 0, 1);
 
-    indexData.push(0, 2, 1);
+    indexData.push(0, 2, 1);*/
 
 
 

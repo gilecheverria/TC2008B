@@ -15,7 +15,7 @@ const vsGLSL = `#version 300 es
 in vec2 a_position;
 in vec4 a_color;
 
-uniform vec2 u_resolution;
+uniform vec2 u_resolution; // uniform variable for the resolution of the canvas
 
 out vec4 v_color;
 

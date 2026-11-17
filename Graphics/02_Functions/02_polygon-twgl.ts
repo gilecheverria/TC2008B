@@ -71,14 +71,14 @@ function generateData(sides: number): twgl.Arrays {
     const indexData: number[] = [];
 
     // Initialize the center vertex, at the origin and with white color
-    positionData.push(0);
-    positionData.push(0);
-    colorData.push(1);
-    colorData.push(1);
-    colorData.push(1);
-    colorData.push(1);
+    positionData.push(0); // x coordinate
+    positionData.push(0); // y coordinate
+    colorData.push(1); // r color
+    colorData.push(1); // g color
+    colorData.push(1); // b color
+    colorData.push(1); // a color
 
-    const angleStep = 2 * Math.PI / sides;
+    const angleStep = 2 * Math.PI / sides; // Angle between each side of the polygon
 
     // Loop over the sides to create the rest of the vertices
     for (let s = 0; s < sides; s++) {

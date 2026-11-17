@@ -63,12 +63,18 @@ class RotationScene extends Scene {
 
         // Transform matrices for the model
         // TODO: Create the matrices necessary
-
+        const translateMatrixModel: Mat3 = M3.translation(v2_trans);
+        const rotateMatrixModel: Mat3 = M3.rotation(model.transforms.rr.z);
+        const scaleMatrixModel: Mat3 = M3.scale(v2_scale);
 
 
         // Create a composite transform matrix
         let modelTransforms: Mat3 = M3.identity();
         // TODO: Multiply the matrices in the correct order to obtain the required results
+        let multiplyMatrix: Mat3 = M3.multiply(scaleMatrixModel, modelTransforms);
+        multiplyMatrix = M3.multiply(rotateMatrixModel, multiplyMatrix);
+        multiplyMatrix = M3.multiply(translateMatrixModel, multiplyMatrix);
+        modelTransforms = multiplyMatrix;
 
 
 

@@ -9,24 +9,25 @@
 import * as twgl from 'twgl-base.js';
 
 // Vertex Shader as a string
-const vsGLSL = `#version 300 es
-in vec4 a_position;
-in vec4 a_color;
-
-out vec4 v_color;
+const vsGLSL = `#version 300 es // version de webgl
+// Atributos de entrada para el vertex shader
+in vec4 a_position; // conjuntos de 4 valores de entrada para la posición de los vértices, input
+in vec4 a_color; // conjuntos de 4 valores de entrada para el color de los vértices, input
+// Atributos de salida para el vertex shader (varying)
+out vec4 v_color; // conjunto de 4 valores de salida para el color interpolado, output
 
 void main() {
-    gl_Position = a_position;
+    gl_Position = a_position; // gl_Position es una variable de salida predefinida que indica la posición final del vértice en el espacio de recorte
     v_color = a_color;
 }
 `;
 
 // Fragment Shader as a string
 const fsGLSL = `#version 300 es
-precision highp float;
-
+precision highp float; // precision de las variables de tipo float
+// Varying
 in vec4 v_color;
-
+// output
 out vec4 outColor;
 
 void main() {
@@ -51,9 +52,9 @@ function main_twgl(): void {
 
     // Create an object that contains the arrays with the data
     // for each of the vertices
-    const arrays = generateData();
-    const bufferInfo = twgl.createBufferInfoFromArrays(gl, arrays);
-    const vao = twgl.createVAOFromBufferInfo(gl, programInfo, bufferInfo);
+    const arrays = generateData(); // genera la figura
+    const bufferInfo = twgl.createBufferInfoFromArrays(gl, arrays); // genera el buffer de datos para la figura
+    const vao = twgl.createVAOFromBufferInfo(gl, programInfo, bufferInfo); // genera el VAO para la figura (vertex array object)
 
     gl.bindVertexArray(vao);
     gl.useProgram(programInfo.program);

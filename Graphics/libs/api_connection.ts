@@ -8,7 +8,6 @@
 
 'use strict';
 
-import * as twgl from 'twgl-base.js';
 import { randomColor } from '../libs/color.ts';
 import { Object3DProgram } from './object3d_multi_shader';
 import { Scene } from '../libs/scene_multi_shader.js';

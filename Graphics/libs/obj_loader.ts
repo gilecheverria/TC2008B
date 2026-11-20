@@ -57,7 +57,7 @@ export class ObjLoader {
      *  - parts: an array of strings found after the 'f' in the OBJ file.
      *  - objData: arrays with the values for vertex positions, vertex normals
      *       and texture coordinates. All previously read from the file.
-     *  - arrays: structure that will be filled with the corresponding data
+     *  - arrays: structure that will be filled with the correspoinding data
      *       in the order required.
      */
     parseFace(parts: string[], objData: ObjData, arrays: ObjArrays) {
@@ -70,10 +70,37 @@ export class ObjLoader {
         // The result of the following line should look like:
         // [['2164', '65, '2164'], ['2172', '76', '2172'], ['1725', '77', '1725']]
         let faceVerts: string[][] = parts.slice(1).map(face => face.split('/'));
-        faceVerts.forEach(vert => {
 
-            // TODO: Read the description of a face, and store the corresponding
-            // data in 'arrays'.
+        faceVerts.forEach(vert => {
+            const vertex = vert.join('') != '' ? Number(vert) : undefined
+            if (vertex !== undefined) {
+                // console.log(objData.vertices[vert[0]])
+
+                const vIndex = Number(vert[0]);
+                // First element is the vertex index
+                arrays.a_position.data.push(...objData.vertices[vIndex]);
+
+                // Second element is the texture index
+                if (vert.length > 1 && vert[1] != "") {
+                    const tIndex = Number(vert[1]);
+                    arrays.a_texCoord.data.push(...objData.textures[tIndex]);
+                }
+                // Third element is the normal index
+                if (vert.length > 2 && vert[2] != "") {
+                    const nIndex = Number(vert[2]);
+                    arrays.a_normal.data.push(...objData.normals[nIndex]);
+                }
+
+                // Assign the color for the vertex
+                if (this.materialInUse?.Kd) {
+                    arrays.a_color.data.push(...this.materialInUse.Kd, 1);
+                } else {
+                    // Force a color for each vertex
+                    arrays.a_color.data.push(0.4, 0.4, 0.4, 1);
+                }
+                // This is not really necessary, but just in case
+                objData.faces.push({v: vert[0], t: vert[1], n: vert[2]});
+            }
         });
     }
 
@@ -104,14 +131,33 @@ export class ObjLoader {
         let partInfo: number[];
         const lines = objString.split('\n');
         lines.forEach(line => {
-
-            // TODO: Read each line of the OBJ file. Depending on the first
-            // word in the line (v, vn, vt), store the data into
-            // the corresponding array of 'objData'.
-            // If the first word is 'f', fill the necessary elements in 'arrays'.
-            // If the first word is 'usemtl', assign the material as
-            // the currently active one, to then assign the color to the faces.
-
+            const parts = line.split(/\s+/);
+            switch (parts[0]) {
+                case 'v':
+                    // Ignore the first part (the keyword),
+                    // remove any empty elements and convert them into a number
+                    partInfo = parts.slice(1).filter(v => v != '').map(Number);
+                    objData.vertices.push(partInfo);
+                    break;
+                case 'vn':
+                    partInfo = parts.slice(1).filter(vn => vn != '').map(Number);
+                    objData.normals.push(partInfo);
+                    break;
+                case 'vt':
+                    partInfo = parts.slice(1).filter(vt => vt != '').map(Number);
+                    objData.textures.push(partInfo);
+                    break;
+                case 'f':
+                    this.parseFace(parts, objData, arrays);
+                    break;
+                case 'usemtl':
+                    // Check that the material is defined in the MTL file
+                    if (Object.prototype.hasOwnProperty.call(this.materials, parts[1])) {
+                        // Set the active material to asign it to any face read afterwards
+                        this.materialInUse = this.materials[parts[1]];
+                    }
+                    break;
+            }
         });
 
         //console.log("ATTRIBUTES:")
@@ -133,12 +179,26 @@ export class ObjLoader {
 
         let lines = mtlString.split('\n');
         lines.forEach(line => {
-
-            // TODO: Process the material file line by line.
-            // Register 'newmtl' as new materials in the materials attribute
-            // of this class.
-            // For each material, store its properties in the corresponding fields.
-
+            const parts = line.split(/\s+/);
+            switch (parts[0]) {
+                case 'newmtl':
+                    // Add a new entry into the object
+                    this.materials[parts[1]] = {};
+                    currentMtl = this.materials[parts[1]];
+                    break;
+                case 'Ns':  // Specular coefficient ("Shininess")
+                    currentMtl.Ns = Number(parts[1]);
+                    break;
+                case 'Kd':  // The diffuse color
+                    currentMtl.Kd = parts.slice(1).filter(v => v != '').map(Number);
+                    break;
+                case 'Ka':  // The ambient color
+                    currentMtl.Ka = parts.slice(1).filter(v => v != '').map(Number);
+                    break;
+                case 'Ks':  // The specular color
+                    currentMtl.Ks = parts.slice(1).filter(v => v != '').map(Number);
+                    break;
+            }
         });
     }
 }

@@ -56,7 +56,7 @@ python agents_server.py
 
 ### Step 2: Running the WebGL application
 
-1. Navigate to the `Backend` folder.
+1. Navigate to the `Frontend` folder.
 2. Make sure that you installed the dependencies with `npm i`.
 3. Run the vite server:
 

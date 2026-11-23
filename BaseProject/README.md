@@ -10,7 +10,7 @@ are used to obtain information from the mesa simulation. The visualization with
 WebGL uses a Vite server to host the client application.
 
 It is primarily used to visualize the **Random Agents** model, but the logic
-can be extended to visualize the **Traffic/City** simulation.
+can be extended to visualize the **TrafficBackend** simulation.
 
 ---
 

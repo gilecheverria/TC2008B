@@ -1,6 +1,7 @@
 services:
   backend:
     build:
+      # context: ./TrafficBackend
       context: ./Backend
       dockerfile: Dockerfile
     ports:

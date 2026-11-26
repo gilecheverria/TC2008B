@@ -1,3 +1,4 @@
+import random
 from random import shuffle
 from mesa import Model
 from mesa.discrete_space import OrthogonalMooreGrid
@@ -10,15 +11,15 @@ class RandomModel(Model):
         num_agents: Number of agents in the simulation
         height, width: The size of the grid to model
     """
-    def __init__(self, num_agents=10, width=8, height=8, seed=42):
+    def __init__(self, num_agents=10, width=8, height=8, rng=42):
 
-        super().__init__(seed=seed)
+        super().__init__(rng=rng)
         self.num_agents = num_agents
-        self.seed = seed
+        self.rng = rng
         self.width = width
         self.height = height
         # Multigrid is a special type of grid where each cell can contain multiple agents.
-        self.grid = OrthogonalMooreGrid([width, height], torus=False)
+        self.grid = OrthogonalMooreGrid([width, height], torus=False, random=random)
 
         # Identify the coordinates of the border of the grid
         border = [(x,y) for y in range(height)

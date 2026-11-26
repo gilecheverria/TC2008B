@@ -10,7 +10,7 @@ are used to obtain information from the mesa simulation. The visualization with
 WebGL uses a Vite server to host the client application.
 
 It is primarily used to visualize the **Random Agents** model, but the logic
-can be extended to visualize the **Traffic/City** simulation.
+can be extended to visualize the **TrafficBackend** simulation.
 
 ---
 
@@ -56,7 +56,7 @@ python agents_server.py
 
 ### Step 2: Running the WebGL application
 
-1. Navigate to the `Backend` folder.
+1. Navigate to the `Frontend` folder.
 2. Make sure that you installed the dependencies with `npm i`.
 3. Run the vite server:
 
